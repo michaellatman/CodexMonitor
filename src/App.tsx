@@ -60,6 +60,7 @@ function App() {
     addWorkspace,
     connectWorkspace,
     markWorkspaceConnected,
+    updateWorkspaceSettings,
     hasLoaded,
     refreshWorkspaces,
   } = useWorkspaces({ onDebug: addDebugEntry });
@@ -266,6 +267,16 @@ function App() {
         }}
         onConnectWorkspace={connectWorkspace}
         onAddAgent={handleAddAgent}
+        onToggleWorkspaceCollapse={(workspaceId, collapsed) => {
+          const target = workspaces.find((entry) => entry.id === workspaceId);
+          if (!target) {
+            return;
+          }
+          void updateWorkspaceSettings(workspaceId, {
+            ...target.settings,
+            sidebarCollapsed: collapsed,
+          });
+        }}
         onSelectThread={(workspaceId, threadId) => {
           exitDiffView();
           setActiveWorkspaceId(workspaceId);

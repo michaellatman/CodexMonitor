@@ -1,28 +1,8 @@
 import type { RateLimitSnapshot, ThreadSummary, WorkspaceInfo } from "../types";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Menu, MenuItem } from "@tauri-apps/api/menu";
 import { LogicalPosition } from "@tauri-apps/api/dpi";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-
-const COLLAPSED_WORKSPACES_KEY = "codexmonitor.sidebar.collapsedWorkspaces";
-
-function loadCollapsedWorkspaces(): Set<string> {
-  if (typeof window === "undefined") {
-    return new Set<string>();
-  }
-  const raw = window.localStorage.getItem(COLLAPSED_WORKSPACES_KEY);
-  if (!raw) {
-    return new Set<string>();
-  }
-  try {
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) {
-      return new Set(parsed.filter((id) => typeof id === "string"));
-    }
-  } catch {
-  }
-  return new Set<string>();
-}
 
 type SidebarProps = {
   workspaces: WorkspaceInfo[];
@@ -38,6 +18,7 @@ type SidebarProps = {
   onSelectWorkspace: (id: string) => void;
   onConnectWorkspace: (workspace: WorkspaceInfo) => void;
   onAddAgent: (workspace: WorkspaceInfo) => void;
+  onToggleWorkspaceCollapse: (workspaceId: string, collapsed: boolean) => void;
   onSelectThread: (workspaceId: string, threadId: string) => void;
   onDeleteThread: (workspaceId: string, threadId: string) => void;
 };
@@ -53,25 +34,13 @@ export function Sidebar({
   onSelectWorkspace,
   onConnectWorkspace,
   onAddAgent,
+  onToggleWorkspaceCollapse,
   onSelectThread,
   onDeleteThread,
 }: SidebarProps) {
   const [expandedWorkspaces, setExpandedWorkspaces] = useState(
     new Set<string>(),
   );
-  const [collapsedWorkspaces, setCollapsedWorkspaces] = useState(
-    loadCollapsedWorkspaces,
-  );
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-    window.localStorage.setItem(
-      COLLAPSED_WORKSPACES_KEY,
-      JSON.stringify(Array.from(collapsedWorkspaces)),
-    );
-  }, [collapsedWorkspaces]);
 
   async function showThreadMenu(
     event: React.MouseEvent,
@@ -154,7 +123,7 @@ export function Sidebar({
         <div className="workspace-list">
           {workspaces.map((entry) => {
             const threads = threadsByWorkspace[entry.id] ?? [];
-            const isCollapsed = collapsedWorkspaces.has(entry.id);
+            const isCollapsed = entry.settings.sidebarCollapsed;
             const showThreads = !isCollapsed && threads.length > 0;
 
             return (
@@ -183,15 +152,7 @@ export function Sidebar({
                           }`}
                           onClick={(event) => {
                             event.stopPropagation();
-                            setCollapsedWorkspaces((prev) => {
-                              const next = new Set(prev);
-                              if (next.has(entry.id)) {
-                                next.delete(entry.id);
-                              } else {
-                                next.add(entry.id);
-                              }
-                              return next;
-                            });
+                            onToggleWorkspaceCollapse(entry.id, !isCollapsed);
                           }}
                           data-tauri-drag-region="false"
                           aria-label={
