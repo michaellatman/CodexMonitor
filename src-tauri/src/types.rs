@@ -215,6 +215,10 @@ pub(crate) struct AppSettings {
         rename = "composerReasoningShortcut"
     )]
     pub(crate) composer_reasoning_shortcut: Option<String>,
+    #[serde(default, rename = "lastComposerModelId")]
+    pub(crate) last_composer_model_id: Option<String>,
+    #[serde(default, rename = "lastComposerReasoningEffort")]
+    pub(crate) last_composer_reasoning_effort: Option<String>,
     #[serde(default = "default_ui_scale", rename = "uiScale")]
     pub(crate) ui_scale: f64,
     #[serde(
@@ -335,6 +339,8 @@ impl Default for AppSettings {
             composer_model_shortcut: default_composer_model_shortcut(),
             composer_access_shortcut: default_composer_access_shortcut(),
             composer_reasoning_shortcut: default_composer_reasoning_shortcut(),
+            last_composer_model_id: None,
+            last_composer_reasoning_effort: None,
             ui_scale: 1.0,
             notification_sounds_enabled: true,
             experimental_collab_enabled: false,
@@ -373,6 +379,8 @@ mod tests {
             settings.composer_reasoning_shortcut.as_deref(),
             Some("cmd+shift+r")
         );
+        assert!(settings.last_composer_model_id.is_none());
+        assert!(settings.last_composer_reasoning_effort.is_none());
         assert!((settings.ui_scale - 1.0).abs() < f64::EPSILON);
         assert!(settings.notification_sounds_enabled);
         assert!(!settings.experimental_steer_enabled);

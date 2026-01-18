@@ -80,6 +80,8 @@ export type AppSettings = {
   composerModelShortcut: string | null;
   composerAccessShortcut: string | null;
   composerReasoningShortcut: string | null;
+  lastComposerModelId: string | null;
+  lastComposerReasoningEffort: string | null;
   uiScale: number;
   notificationSoundsEnabled: boolean;
   experimentalCollabEnabled: boolean;
