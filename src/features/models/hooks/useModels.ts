@@ -154,6 +154,52 @@ export function useModels({
     setSelectedEffort(selectedModel.defaultReasoningEffort ?? null);
   }, [selectedEffort, selectedModel]);
 
+  useEffect(() => {
+    if (!models.length) {
+      return;
+    }
+    const preferredSelection = preferredModelId
+      ? models.find((model) => model.id === preferredModelId) ?? null
+      : null;
+    if (!preferredSelection) {
+      return;
+    }
+    const preferredCodex =
+      models.find((model) => model.model === "gpt-5.2-codex") ?? null;
+    const defaultModel =
+      preferredCodex ?? models.find((model) => model.isDefault) ?? models[0] ?? null;
+    const shouldApplyPreferredModel =
+      !selectedModelId ||
+      (defaultModel &&
+        selectedModelId === defaultModel.id &&
+        selectedModelId !== preferredSelection.id);
+    if (shouldApplyPreferredModel) {
+      setSelectedModelId(preferredSelection.id);
+      const nextEffort =
+        preferredEffort &&
+        preferredSelection.supportedReasoningEfforts.some(
+          (effort) => effort.reasoningEffort === preferredEffort,
+        )
+          ? preferredEffort
+          : preferredSelection.defaultReasoningEffort ?? null;
+      setSelectedEffort(nextEffort);
+      return;
+    }
+    if (selectedModelId !== preferredSelection.id || !preferredEffort) {
+      return;
+    }
+    const preferredEffortSupported = preferredSelection.supportedReasoningEfforts.some(
+      (effort) => effort.reasoningEffort === preferredEffort,
+    );
+    if (!preferredEffortSupported) {
+      return;
+    }
+    const defaultEffort = preferredSelection.defaultReasoningEffort ?? null;
+    if (!selectedEffort || selectedEffort === defaultEffort) {
+      setSelectedEffort(preferredEffort);
+    }
+  }, [models, preferredEffort, preferredModelId, selectedEffort, selectedModelId]);
+
   return {
     models,
     selectedModel,
