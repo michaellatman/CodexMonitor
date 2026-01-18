@@ -364,7 +364,12 @@ function MainApp() {
     reasoningOptions,
     selectedEffort,
     setSelectedEffort
-  } = useModels({ activeWorkspace, onDebug: addDebugEntry });
+  } = useModels({
+    activeWorkspace,
+    onDebug: addDebugEntry,
+    preferredModelId: appSettings.lastComposerModelId,
+    preferredEffort: appSettings.lastComposerReasoningEffort,
+  });
   const {
     collaborationModes,
     selectedCollaborationMode,
@@ -476,6 +481,27 @@ function MainApp() {
     diffSource === "pr" ? gitPullRequestDiffsLoading : isDiffLoading;
   const activeDiffError =
     diffSource === "pr" ? gitPullRequestDiffsError : diffError;
+
+  useEffect(() => {
+    if (!selectedModelId && selectedEffort === null) {
+      return;
+    }
+    setAppSettings((current) => {
+      if (
+        current.lastComposerModelId === selectedModelId &&
+        current.lastComposerReasoningEffort === selectedEffort
+      ) {
+        return current;
+      }
+      const nextSettings = {
+        ...current,
+        lastComposerModelId: selectedModelId,
+        lastComposerReasoningEffort: selectedEffort,
+      };
+      void queueSaveSettings(nextSettings);
+      return nextSettings;
+    });
+  }, [queueSaveSettings, selectedEffort, selectedModelId, setAppSettings]);
 
   useEffect(() => {
     if (diffSource !== "pr" || centerMode !== "diff") {
