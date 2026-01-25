@@ -682,6 +682,7 @@ function MainApp() {
   const { exitDiffView, selectWorkspace, selectHome } = useWorkspaceSelection({
     workspaces,
     isCompact,
+    activeWorkspaceId,
     setActiveTab,
     setActiveWorkspaceId,
     updateWorkspaceSettings,
