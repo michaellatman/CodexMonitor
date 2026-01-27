@@ -853,7 +853,7 @@ impl DaemonState {
         if codex_home_changed || codex_args_changed {
             let app_settings = self.app_settings.lock().await.clone();
             let default_bin = app_settings.codex_bin.clone();
-            for child in child_entries {
+            for child in &child_entries {
                 let connected = self.sessions.lock().await.contains_key(&child.id);
                 if !connected {
                     continue;
