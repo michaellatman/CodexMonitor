@@ -74,8 +74,22 @@ export function useUpdaterController({
   }, [errorSoundUrl, onDebug, successSoundUrl]);
 
   const handleTestSystemNotification = useCallback(() => {
-    void sendNotification("Test Notification", "This is a test notification from CodexMonitor.");
-  }, []);
+    if (!systemNotificationsEnabled) {
+      return;
+    }
+    void sendNotification(
+      "Test Notification",
+      "This is a test notification from CodexMonitor.",
+    ).catch((error) => {
+      onDebug({
+        id: `${Date.now()}-client-notification-test-error`,
+        timestamp: Date.now(),
+        source: "error",
+        label: "notification/test-error",
+        payload: error instanceof Error ? error.message : String(error),
+      });
+    });
+  }, [onDebug, systemNotificationsEnabled]);
 
   return {
     updaterState,
