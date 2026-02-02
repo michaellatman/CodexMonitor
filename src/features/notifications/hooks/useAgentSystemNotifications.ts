@@ -157,13 +157,13 @@ export function useAgentSystemNotifications({
       if (!shouldNotify(durationMs, threadKey)) {
         return;
       }
-      lastMessageByThread.current.delete(threadKey);
       const { title, body } = getNotificationContent(
         workspaceId,
         threadId,
         "Your agent has finished its task.",
       );
       void notify(title, body, "success");
+      lastMessageByThread.current.delete(threadKey);
     },
     [consumeDuration, getNotificationContent, notify, shouldNotify],
   );
@@ -183,10 +183,10 @@ export function useAgentSystemNotifications({
       if (!shouldNotify(durationMs, threadKey)) {
         return;
       }
-      lastMessageByThread.current.delete(threadKey);
       const title = getWorkspaceName?.(workspaceId) ?? "Agent Error";
       const body = payload.message || "An error occurred.";
       void notify(title, truncateText(body, MAX_BODY_LENGTH), "error");
+      lastMessageByThread.current.delete(threadKey);
     },
     [consumeDuration, getWorkspaceName, notify, shouldNotify],
   );
@@ -216,13 +216,13 @@ export function useAgentSystemNotifications({
       if (!shouldNotify(durationMs, threadKey)) {
         return;
       }
-      lastMessageByThread.current.delete(threadKey);
       const { title, body } = getNotificationContent(
         event.workspaceId,
         event.threadId,
         "Your agent has finished its task.",
       );
       void notify(title, body, "success");
+      lastMessageByThread.current.delete(threadKey);
     },
     [consumeDuration, getNotificationContent, notify, shouldNotify],
   );
