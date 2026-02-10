@@ -398,6 +398,7 @@ function MainApp() {
     activeWorkspace,
     gitDiffPreloadEnabled: appSettings.preloadGitDiffs,
     gitDiffIgnoreWhitespaceChanges: appSettings.gitDiffIgnoreWhitespaceChanges,
+    splitChatDiffView: appSettings.splitChatDiffView,
     isCompact,
     isTablet,
     activeTab,
