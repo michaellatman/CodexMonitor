@@ -114,6 +114,7 @@ import { useWorkspaceAgentMd } from "./features/workspaces/hooks/useWorkspaceAge
 import { isMobilePlatform } from "./utils/platformPaths";
 import type {
   AccessMode,
+  AppMention,
   ComposerEditorSettings,
   WorkspaceInfo,
 } from "./types";
@@ -502,11 +503,6 @@ function MainApp() {
     onFocusComposer: () => composerInputRef.current?.focus(),
   });
   const { skills } = useSkills({ activeWorkspace, onDebug: addDebugEntry });
-  const { apps } = useApps({
-    activeWorkspace,
-    enabled: appSettings.experimentalAppsEnabled,
-    onDebug: addDebugEntry,
-  });
   const {
     prompts,
     createPrompt,
@@ -712,6 +708,12 @@ function MainApp() {
     customPrompts: prompts,
     onMessageActivity: queueGitStatusRefresh,
     threadSortKey: threadListSortKey,
+  });
+  const { apps } = useApps({
+    activeWorkspace,
+    activeThreadId,
+    enabled: appSettings.experimentalAppsEnabled,
+    onDebug: addDebugEntry,
   });
 
   const { handleSetThreadListSortKey, handleRefreshAllWorkspaceThreads } =
@@ -1564,16 +1566,28 @@ function MainApp() {
     queueMessage,
   });
   const handleComposerSendWithDraftStart = useCallback(
-    (text: string, images: string[]) =>
-      runWithDraftStart(() => handleComposerSend(text, images)),
+    (text: string, images: string[], appMentions?: AppMention[]) =>
+      runWithDraftStart(() => (
+        appMentions && appMentions.length > 0
+          ? handleComposerSend(text, images, appMentions)
+          : handleComposerSend(text, images)
+      )),
     [handleComposerSend, runWithDraftStart],
   );
   const handleComposerQueueWithDraftStart = useCallback(
-    (text: string, images: string[]) => {
+    (text: string, images: string[], appMentions?: AppMention[]) => {
       // Queueing without an active thread would no-op; bootstrap through send so user input is not lost.
       const runner = activeThreadId
-        ? () => handleComposerQueue(text, images)
-        : () => handleComposerSend(text, images);
+        ? () => (
+          appMentions && appMentions.length > 0
+            ? handleComposerQueue(text, images, appMentions)
+            : handleComposerQueue(text, images)
+        )
+        : () => (
+          appMentions && appMentions.length > 0
+            ? handleComposerSend(text, images, appMentions)
+            : handleComposerSend(text, images)
+        );
       return runWithDraftStart(runner);
     },
     [activeThreadId, handleComposerQueue, handleComposerSend, runWithDraftStart],
