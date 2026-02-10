@@ -2312,6 +2312,7 @@ function MainApp() {
         tabletTab={tabletTab}
         centerMode={centerMode}
         preloadGitDiffs={appSettings.preloadGitDiffs}
+        splitChatDiffView={appSettings.splitChatDiffView}
         hasActivePlan={hasActivePlan}
         activeWorkspace={Boolean(activeWorkspace)}
         sidebarNode={sidebarNode}
